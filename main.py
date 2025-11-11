@@ -65,7 +65,7 @@ def save_submission(y_pred, filename="submission.csv"):
 def main():
     # 1. Uploading data
     X, y, X_test = load_data()
-    pipeline = create_full_pipeline(X, model_name="rf", n_estimators=300)
+    pipeline = create_full_pipeline(X, model_name="gb", n_estimators=300)
 
     # 2. We estimate the model using CV
     print("Running cross-validation...")

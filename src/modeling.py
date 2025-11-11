@@ -1,6 +1,6 @@
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 
-def get_model(name: str = "rf", **kwargs):
+def get_model(name: str = "gb", **kwargs):
     if name == "rf":
         return RandomForestClassifier(
             n_estimators=kwargs.get("n_estimators", 300),
