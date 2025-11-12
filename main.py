@@ -3,7 +3,7 @@ import pandas as pd
 
 from src.pipeline import create_full_pipeline
 from src.evaluation import evaluate_model
-from sklearn.model_selection import cross_val_score, StratifiedKFold
+from src.preprocessing import basic_feature_filtering
 
 DATA_DIR = "data"
 SUBMISSIONS_DIR = "submissions"
@@ -19,12 +19,18 @@ def load_data():
     y = train["y"]
     X = train.drop(columns=["y"])
 
-    return X, y, test
+    X_clean, test_clean, _ = basic_feature_filtering(X, 
+                                                       test, 
+                                                       sparse_threshold=0.10, 
+                                                       high_cardinality_threshold=900,
+    )
+
+    return X_clean, y, test_clean
 
 def run_cv(X, y):
     """Creates a pipeline and calculates balanced_accuracy through CV."""
     # тут можна поміняти модель: "rf" або "gb"
-    pipeline = create_full_pipeline(X, model_name="rf", n_estimators=300)
+    pipeline = create_full_pipeline(X, model_name="gb")
 
     scores = evaluate_model(
         pipeline,
@@ -36,12 +42,12 @@ def run_cv(X, y):
     )
 
     print("CV scores:", scores)
-    print("Mean balanced_accuracy:", scores.mean())
-    print("Std:", scores.std())
+    print(f"Mean balanced_accuracy: {scores.mean() * 100:.2f}%")
+    print(f"Std (spread across folds): {scores.std():.4f}")
 
 def train_and_predict(X, y, X_test):
     """Trains the pipeline on all train data and returns predictions for the test."""
-    pipeline = create_full_pipeline(X, model_name="rf", n_estimators=300)
+    pipeline = create_full_pipeline(X, model_name="gb")
 
     pipeline.fit(X, y)
     y_pred = pipeline.predict(X_test)
@@ -65,7 +71,6 @@ def save_submission(y_pred, filename="submission.csv"):
 def main():
     # 1. Uploading data
     X, y, X_test = load_data()
-    pipeline = create_full_pipeline(X, model_name="gb", n_estimators=300)
 
     # 2. We estimate the model using CV
     print("Running cross-validation...")
@@ -76,7 +81,7 @@ def main():
     y_pred = train_and_predict(X, y, X_test)
 
     # 4. We are saving the summit
-    save_submission(y_pred, filename="submission_rf_baseline.csv")
+    save_submission(y_pred, filename="submission_gb_best.csv")
 
 
 if __name__ == "__main__":

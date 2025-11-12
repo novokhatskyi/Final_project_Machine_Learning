@@ -33,7 +33,7 @@ def create_preprocessor(num_cols: list, cat_cols: list):
     numeric_transformer = SimpleImputer(strategy="median")
     
     categorical_transformer = Pipeline(steps=[
-        ("imputer", SimpleImputer(strategy="most_frequent")),
+        ("imputer", SimpleImputer(strategy="constant", fill_value='Missing') ),
         ("onehot", OneHotEncoder(handle_unknown="ignore", sparse_output=False))
     ])
     
@@ -43,3 +43,26 @@ def create_preprocessor(num_cols: list, cat_cols: list):
     ])
     
     return preprocessor
+
+def basic_feature_filtering(X_train: pd.DataFrame, X_test: pd.DataFrame, sparse_threshold: float = 0.10, high_cardinality_threshold: int = 900):
+    """
+    Basic feature cleaning:
+      - drops completely empty;
+      - the drops are very "leaky" (< sparse_threshold filled);
+      - drops categorical ones with n_unique > high_cardinality_threshold.
+    Returns:
+      X_train_clean, X_test_clean, cols_to_drop.
+    """
+    n_raws = len(X_train)
+    non_null_ratio = X_train.notnull().sum() / n_raws
+    cols_very_sparse = non_null_ratio[non_null_ratio < sparse_threshold].index
+    cat_cols = X_train.select_dtypes(include=["object"]).columns
+    nunique_cat = X_train[cat_cols].nunique()
+    cols_high_cardinality = nunique_cat[nunique_cat > high_cardinality_threshold].index
+    cols_to_drop = sorted(set(cols_very_sparse) | set(cols_high_cardinality))
+
+    X_train_clean = X_train.drop(columns=cols_to_drop)
+    X_test_clean = X_test.drop(columns=cols_to_drop)
+
+    return X_train_clean, X_test_clean, cols_to_drop
+

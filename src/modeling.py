@@ -10,9 +10,10 @@ def get_model(name: str = "gb", **kwargs):
         )
     if name == "gb":
         return GradientBoostingClassifier(
-            n_estimators=kwargs.get("n_estimators", 300),
+            n_estimators=kwargs.get("n_estimators", 600),
             learning_rate=kwargs.get("learning_rate", 0.1),
-            max_depth=kwargs.get("max_depth", 3),
+            max_depth=kwargs.get("max_depth", 5),
+            min_samples_leaf=kwargs.get("min_samples_leaf", 30),
             random_state=kwargs.get("random_state", 42),
         )
     raise ValueError(f"Unknown model name: {name}")
