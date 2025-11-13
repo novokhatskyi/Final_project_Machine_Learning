@@ -30,7 +30,7 @@ def load_data():
 def run_cv(X, y):
     """Creates a pipeline and calculates balanced_accuracy through CV."""
     # тут можна поміняти модель: "rf" або "gb"
-    pipeline = create_full_pipeline(X, model_name="gb")
+    pipeline = create_full_pipeline(X, model_name="rf")
 
     scores = evaluate_model(
         pipeline,
@@ -47,7 +47,7 @@ def run_cv(X, y):
 
 def train_and_predict(X, y, X_test):
     """Trains the pipeline on all train data and returns predictions for the test."""
-    pipeline = create_full_pipeline(X, model_name="gb")
+    pipeline = create_full_pipeline(X, model_name="rf")
 
     pipeline.fit(X, y)
     y_pred = pipeline.predict(X_test)
@@ -81,7 +81,7 @@ def main():
     y_pred = train_and_predict(X, y, X_test)
 
     # 4. We are saving the summit
-    save_submission(y_pred, filename="submission_gb_best.csv")
+    save_submission(y_pred, filename="submission_best.csv")
 
 
 if __name__ == "__main__":
